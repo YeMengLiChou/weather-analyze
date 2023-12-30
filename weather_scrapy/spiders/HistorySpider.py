@@ -1,16 +1,14 @@
-from typing import Generator
 from typing import Any
 
 import scrapy
-
-from config import constants
-from scrapy.http import Response
+from requests import Response
 
 from weather_scrapy.spiders.WrappedRedisSpider import WrappedRedisSpider
 
 
-class RealWeatherSpider(WrappedRedisSpider):
-    name = 'real'
+class HistorySpider(WrappedRedisSpider):
+
+    name = 'history'
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):

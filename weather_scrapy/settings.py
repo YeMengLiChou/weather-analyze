@@ -1,12 +1,4 @@
-# import sys
-# import os
-# CURRENT_DIR = os.path.split(os.path.abspath(__file__))[0] # 当前目录
-# for i in range(4):
-#     config_path = CURRENT_DIR.rsplit(os.sep, i)[0]  # 上三级目录
-#     sys.path.append(config_path)
 
-# print(sys.path)
-# print(config_path, '???')
 from config import config
 
 # Scrapy settings for weather_scrapy project
@@ -133,7 +125,8 @@ SPIDER_MIDDLEWARES = {
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    "weather_scrapy.middlewares.UserAgentMiddleware": 100
+    "weather_scrapy.middlewares.UserAgentMiddleware": 100,
+    "weather_scrapy.middlewares.DebugMiddleware": 100,
 
     # "weather_scrapy.middlewares.WeatherScrapyDownloaderMiddleware": 543,
 }

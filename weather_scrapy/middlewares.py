@@ -2,12 +2,14 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
 import random
 
 from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+from scrapy.http import Response
 
 
 class UserAgentMiddleware:
@@ -50,6 +52,19 @@ class UserAgentMiddleware:
 
     def process_response(self, request, response, spider):
         return response
+
+
+class DebugMiddleware:
+    def process_response(self, request, response: Response, spider):
+        if response.status != 200:
+            spider.logger.warn(f'{spider.name} response from {response.url}:\n {response.text}')
+        return response
+
+# class RetryMiddleware:
+#     def process_response(self, request, response, spider):
+#         if response.status in [404, 500, 502, 503, 504]:
+#             return request.replace(dont_filter=True)
+#         return response
 
 
 class WeatherScrapySpiderMiddleware:
