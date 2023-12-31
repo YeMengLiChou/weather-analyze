@@ -7,7 +7,6 @@ from weather_scrapy.spiders.WrappedRedisSpider import WrappedRedisSpider
 
 
 class HistorySpider(WrappedRedisSpider):
-
     name = 'history'
 
     @classmethod
@@ -24,10 +23,9 @@ class HistorySpider(WrappedRedisSpider):
         # 开始准备工作，检查是否存在城市数据
         request = self.start_prepare(callback=self.start_real_scrape)
         if request:
-            for req in request:
-                yield req
+            yield from request
         else:
-            yield self.start_real_scrape()
+            yield from self.start_real_scrape()
 
     def start_real_scrape(self):
         """

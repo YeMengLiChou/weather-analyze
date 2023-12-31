@@ -61,8 +61,8 @@ class WrappedRedisSpider(RedisSpider):
         :return:
         """
         return scrapy.Request(url='https://www.tianqi.com/chinacity.html',
-                             callback=self.__parse_city_info,
-                             dont_filter=True)
+                              callback=self.__parse_city_info,
+                              dont_filter=True)
 
     def __start_scrape_city_id(self):
         """
@@ -70,8 +70,8 @@ class WrappedRedisSpider(RedisSpider):
         :return:
         """
         return scrapy.Request(url='https://j.i8tq.com/weather2020/search/city.js',
-                                 callback=self.__parse_city_id,
-                                 dont_filter=True)
+                              callback=self.__parse_city_id,
+                              dont_filter=True)
         # yield request
 
     def __parse_city_info(self, response: Response):
@@ -119,8 +119,8 @@ class WrappedRedisSpider(RedisSpider):
 
         # 开始获取城市id
         yield scrapy.Request(url='https://j.i8tq.com/weather2020/search/city.js',
-                       callback=self.__parse_city_id,
-                       dont_filter=True)
+                             callback=self.__parse_city_id,
+                             dont_filter=True)
 
     def __parse_city_id(self, response: Response):
         """

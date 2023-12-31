@@ -9,5 +9,12 @@ from itemadapter import ItemAdapter
 
 
 class WeatherScrapyPipeline:
+
+
+
     def process_item(self, item, spider):
+
+
+
+
         return item

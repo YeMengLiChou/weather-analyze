@@ -267,7 +267,10 @@ class RedisUtils(object):
         :return:
         """
         keys = [constants.get_city_info_id_key(city) for city in cities]
-        return self.gets(keys)
+        values = self.gets(keys)
+        if values:
+            return [value.decode('utf-8')[1:-1] for value in values]
+        return values
 
     def add_all_cities(self, cities: list[str]):
         """
