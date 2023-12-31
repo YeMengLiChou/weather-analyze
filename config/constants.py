@@ -10,7 +10,7 @@ REDIS_CITY_INFO_CONTAINS = 'city:info:contains'
 - & 2 == 2 表示已经存在城市id数据
 """
 
-REDIS_CITY_INFO_SCRAPING = 'city:info:scrapy'
+REDIS_CITY_INFO_SCRAPING = 'city:info:scraping'
 """
 城市信息是否有爬虫在获取
 
@@ -29,6 +29,15 @@ REDIS_CITY_INFO_RELATION = 'city:info:relation'
 """
 
 REDIS_CITY_INFO_ID_PREFIX = 'city:info:id:'
+"""
+保存城市id数据的前缀
+"""
+
+
+REDIS_CITY_ALL_KEY = 'city:info:all'
+"""
+保存需要爬取的城市信息
+"""
 
 
 def get_city_info_name_key(city_name: str) -> str:
@@ -49,3 +58,5 @@ def get_city_info_id_key(city_id: str) -> str:
     :return: 城市id数据key
     """
     return REDIS_CITY_INFO_ID_PREFIX + city_id
+
+

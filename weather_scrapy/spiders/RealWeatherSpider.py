@@ -40,11 +40,13 @@ class RealWeatherSpider(WrappedRedisSpider):
         all_cities: list[str] = self.redis.get_all_cities()
         ids = self.redis.get_cities_id(all_cities)
         for idx, city_id in zip(all_cities, ids):
-            yield scrapy.Request(url='http://www.weather.com.cn/weather1d/101300501.shtml')
-
-        # for city in all_cities:
-        #     yield scrapy.Request(url=)
-        pass
+            yield scrapy.Request(url=f'http://www.weather.com.cn/weather1d/{city_id}.shtml',
+                                 callback=self.parse)
+            yield scrapy.Request(url=f'http://www.weather.com.cn/weather40d/{city_id}.shtml',
+                                 callback=self.parse_forcast)
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        pass
+
+    def parse_forcast(self, response: Response, **kwargs: Any) -> Any:
         pass
