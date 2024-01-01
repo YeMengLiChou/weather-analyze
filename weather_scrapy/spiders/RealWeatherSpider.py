@@ -1,12 +1,9 @@
 import datetime
 import json
 import time
-from typing import Generator
 from typing import Any
 
 import scrapy
-
-from config import constants
 from scrapy.http import Response
 
 from weather_scrapy.items import RealWeatherItem
@@ -15,6 +12,17 @@ from weather_scrapy.spiders.WrappedRedisSpider import WrappedRedisSpider
 
 class RealWeatherSpider(WrappedRedisSpider):
     name = 'real'
+
+    header = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/92.0.4515.131 Safari/537.36',
+        "accept": "*/*",
+        "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+        "cache-control": "no-cache",
+        "pragma": "no-cache",
+        "proxy-connection": "keep-alive",
+        "referer": 'http://www.weather.com.cn/',
+    }
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -29,10 +37,11 @@ class RealWeatherSpider(WrappedRedisSpider):
         """
         # 开始准备工作，检查是否存在城市数据
         request = self.start_prepare(callback=self.start_real_scrape)
-        print(request)
+        print('====> request:' + str(request))
         if request:
             yield from request
         else:
+            self.wait_scraping()
             yield from self.start_real_scrape()
 
     def start_real_scrape(self):
@@ -40,40 +49,31 @@ class RealWeatherSpider(WrappedRedisSpider):
         开始爬取天气
         :return:
         """
-
         self.logger.info('======> 开始爬取天气')
         all_cities: list[str] = self.redis.get_all_cities()
         ids = self.redis.get_cities_id(all_cities)
-        header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36',
-            "accept": "*/*",
-            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-            "cache-control": "no-cache",
-            "pragma": "no-cache",
-            "proxy-connection": "keep-alive",
-            "referer": 'http://www.weather.com.cn/',
-        }
-        for city_pinyin, city_id in zip(all_cities, ids):
-            yield scrapy.Request(url=f'http://www.weather.com.cn/weather1d/{city_id}.shtml',
-                                 callback=self.parse_page,
-                                 meta={
-                                     'city_id': city_id,
-                                     'city_pinyin': city_pinyin
-                                 },
-                                 dont_filter=True)
+        for city_name, city_id in zip(all_cities, ids):
+            yield scrapy.Request(
+                url=f'http://www.weather.com.cn/weather1d/{city_id}.shtml',
+                callback=self.parse_page,
+                meta={
+                    'city_id': city_id,
+                    'city_name': city_name
+                },
+                dont_filter=True
+            )
             break
 
-    def parse_page(self, response: Response, **kwargs: Any) -> Any:
+    def parse_page(self, response: Response) -> Any:
         """
         解析网页
         :param response:
-        :param kwargs:
         :return:
         """
         meta = response.meta
         city_id = meta['city_id']
-        city_pinyin = meta['city_pinyin']
-        print(f'=====> {city_id} {city_pinyin}')
+        city_name = meta['city_name']
+        print(f'=====> {city_id} {city_name}')
 
         sunrise = response.xpath('//p[@class="sun sunUp"]/span/text()').get()[-5:]
         sunset = response.xpath('//p[@class="sun sunDown"]/span/text()').get()[-5:]
@@ -113,16 +113,18 @@ class RealWeatherSpider(WrappedRedisSpider):
         json_content = json.dumps(content, ensure_ascii=False)
         meta['content'] = json_content
 
-        yield scrapy.Request(url=f'http://d1.weather.com.cn/dingzhi/{city_id}.html?_={int(time.time() * 1000)}',
-                             callback=self.parse_weather_simple_info,
-                             meta=meta
-                             )
+        yield scrapy.Request(
+            url=f'http://d1.weather.com.cn/dingzhi/{city_id}.html?_={int(time.time() * 1000)}',
+            callback=self.parse_weather_simple_info,
+            meta=meta,
+            headers=self.header,
+            dont_filter=True
+        )
 
-    def parse_weather_simple_info(self, response: Response, **kwargs: Any) -> Any:
+    def parse_weather_simple_info(self, response: Response) -> Any:
         """
         解析天气简要信息
         :param response:
-        :param kwargs:
         :return:
         """
         text = response.text
@@ -139,16 +141,18 @@ class RealWeatherSpider(WrappedRedisSpider):
         meta['description'] = content['weather']
         meta['city_name'] = content['cityname']
 
-        yield scrapy.Request(url=f'http://d1.weather.com.cn/sk_2d/{meta["city_id"]}.html?_={int(time.time() * 1000)}',
-                             callback=self.parse_weather_detail_info,
-                             meta=meta
-                             )
+        yield scrapy.Request(
+            url=f'http://d1.weather.com.cn/sk_2d/{meta["city_id"]}.html?_={int(time.time() * 1000)}',
+            callback=self.parse_weather_detail_info,
+            meta=meta,
+            headers=self.header,
+            dont_filter=True
+        )
 
-    def parse_weather_detail_info(self, response: Response, **kwargs: Any) -> Any:
+    def parse_weather_detail_info(self, response: Response) -> Any:
         """
         解析天气详情
         :param response:
-        :param kwargs:
         :return:
         """
         text = response.text
@@ -187,14 +191,11 @@ class RealWeatherSpider(WrappedRedisSpider):
             minute=int(_time.split(':')[1]),
         ).timestamp() * 1000)
 
-        print('detail_info: \n' + str(meta))
-
         item = RealWeatherItem()
         item['city_id'] = meta['city_id']
         item['city_name'] = meta['city_name']
-        item['city_pinyin'] = meta['city_pinyin']
-        item['city_province'] = self.redis.get_city_chinese(
-            self.redis.get_city_province(meta['city_pinyin'])
+        item['city_province'] = self.redis.get_city_id(
+            self.redis.get_city_province(meta['city_name'])
         )
         item['temp'] = meta['temp']
         item['d_temp'] = meta['d_temp']

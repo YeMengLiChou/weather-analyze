@@ -13,12 +13,13 @@ class WeatherScrapyItem(scrapy.Item):
 
 
 class RealWeatherItem(scrapy.Item):
+    """
+    实时数据Item
+    """
     # 城市中文`
     city_name = scrapy.Field()
     # 城市id`
     city_id = scrapy.Field()
-    # 城市拼音`
-    city_pinyin = scrapy.Field()
     # 城市所属省份拼音
     city_province = scrapy.Field()
 
@@ -51,3 +52,30 @@ class RealWeatherItem(scrapy.Item):
     # 日出日落时间
     sunrise = scrapy.Field()
     sunset = scrapy.Field()
+
+
+class HistoryWeatherItem(scrapy.Item):
+    # 城市中文`
+    city_name = scrapy.Field()
+    # 城市id`
+    city_id = scrapy.Field()
+    # 城市拼音`
+    city_pinyin = scrapy.Field()
+    # 城市所属省份拼音
+    city_province = scrapy.Field()
+    # 当前时间的时间戳
+    timestamp = scrapy.Field()
+    # 天气描述
+    description = scrapy.Field()
+    # 最高温度
+    high_temp = scrapy.Field()
+    # 最低温度
+    low_temp = scrapy.Field()
+    # 风向
+    w_direction = scrapy.Field()
+    # 风等级
+    w_level = scrapy.Field()
+    # aqi
+    aqi = scrapy.Field()
+    # aqi状态
+    aqi_status = scrapy.Field()
