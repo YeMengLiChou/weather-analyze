@@ -36,17 +36,17 @@ REDIS_CITY_ALL_KEY = 'city:info:all'
 保存需要爬取的城市id信息
 """
 
-DATA_TYPE_REAL = 'type:real'
+DATA_TYPE_REAL = 1
 """
 实时数据
 """
 
-DATA_TYPE_HISTORY = "type:history"
+DATA_TYPE_HISTORY = 2
 """
 历史数据
 """
 
-DATA_TYPE_FORCAST = "type:forcast"
+DATA_TYPE_FORCAST = 3
 """
 预测数据    
 """

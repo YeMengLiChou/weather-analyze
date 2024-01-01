@@ -50,7 +50,7 @@ SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
 
 # Store scraped item in redis for post-processing.
 ITEM_PIPELINES = {
-    # 'scrapy_redis.pipelines.RedisPipeline': 300
+    'weather_scrapy.pipelines.KafkaPipeline': 100,
 }
 
 # The item pipeline serializes and stores the items in this redis key.
@@ -174,3 +174,4 @@ RETRY_TIMES = 3  # 重试次数
 
 REDIS_CONFIG = config.REDIS_CONFIG
 KAFKA_CONFIG = config.KAFKA_CONFIG
+
