@@ -37,7 +37,6 @@ class RealWeatherSpider(WrappedRedisSpider):
         """
         # 开始准备工作，检查是否存在城市数据
         request = self.start_prepare(callback=self.start_real_scrape)
-        print('====> request:' + str(request))
         if request:
             yield from request
         else:

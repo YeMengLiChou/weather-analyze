@@ -59,9 +59,7 @@ class HistoryWeatherItem(scrapy.Item):
     city_name = scrapy.Field()
     # 城市id`
     city_id = scrapy.Field()
-    # 城市拼音`
-    city_pinyin = scrapy.Field()
-    # 城市所属省份拼音
+    # 城市所属省份
     city_province = scrapy.Field()
     # 当前时间的时间戳
     timestamp = scrapy.Field()

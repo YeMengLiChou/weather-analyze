@@ -189,7 +189,19 @@ class RedisUtils(object):
         :return:
         """
         value = self.__redis_conn.get(constants.get_city_info_spid_key(city_name))
-        return value
+        return value.decode()
+
+    def get_cities_spid_by_name(self, cities_name: list[str]) -> list[str] | None:
+        """
+        获取城市的特殊id
+        :param cities_name:
+        :return:
+        """
+        keys = [constants.get_city_info_spid_key(city_name) for city_name in cities_name]
+        values = [value.decode('utf-8') for value in self.__redis_conn.mget(keys)]
+        if len(values) > 0:
+            return values
+        return None
 
     def get_city_name_by_spid(self, city_id: str) -> str | None:
         """
@@ -198,7 +210,7 @@ class RedisUtils(object):
         :return:
         """
         value = self.__redis_conn.get(constants.get_city_info_spid_key(city_id))
-        return value
+        return value.decode()
 
     def set_city_relation_id(self, province_id: str, cities_id: list[str]):
         """s
@@ -226,7 +238,7 @@ class RedisUtils(object):
 
     def get_city_province(self, city_name: str) -> str | None:
         """
-        获取城市所在省份
+        获取城市所在省份,id和中文都可,id->id, name->name
         :param city_name:
         :return:
         """
