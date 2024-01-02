@@ -19,7 +19,7 @@ class RealData(models.Model):
     rain24h = models.FloatField()
     aqi = models.IntegerField()
     description = models.CharField(max_length=15)
-    content = models.CharField(max_length=1000)
+    content = models.CharField(max_length=1500)
     timestamp = models.DateTimeField()
     sunrise = models.DateTimeField()
     sunset = models.DateTimeField()
