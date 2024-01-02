@@ -17,6 +17,8 @@ __redis = RedisUtils(config=REDIS_CONFIG)
 
 
 def to_json(obj):
+    if isinstance(obj, dict):
+        return obj
     return dict([(key, obj.__dict__[key]) for key in obj.__dict__.keys() if key != '_state'])
 
 
@@ -60,7 +62,7 @@ def get_all_cities(request):
             if province not in result:
                 result[province] = {}
             result[province][city] = city_id
-    return JsonResponse(200, 'success', result)
+    return JsonResponse(__generate_json(200, 'success', result))
 
 
 def get_real_data_by_city_id(request, city_id):
