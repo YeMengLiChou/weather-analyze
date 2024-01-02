@@ -1,15 +1,12 @@
 <template>
     <el-container>
-        <RouterView ></RouterView>
+        <Index></Index>
     </el-container>
 </template>
 
 <script setup>
 import {ref, onMounted} from 'vue';
-
-onMounted(() => {
-    console.log('Home.vue onMounted');
-});
+import Index from './index.vue';
 
 </script>
 

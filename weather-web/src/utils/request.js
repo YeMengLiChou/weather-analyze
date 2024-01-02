@@ -1,12 +1,12 @@
 import axios from "axios";
 import msg from "@/utils/message";
-
+import constants from "@/common/constants";
 
 // 单例 axios 实例
 const service = axios.create({
-    baseURL: constants.baseUrl,
     timeout: 5000,
 });
+
 
 
 // 响应拦截器

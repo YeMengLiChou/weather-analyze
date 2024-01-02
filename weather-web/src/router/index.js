@@ -16,6 +16,23 @@ const router = createRouter({
                 },
             ]
         },
+        {
+            path: '/details',
+            name: 'details',
+            component: () => import('@/views/detail/index.vue'),
+            children: [
+                {
+                    path: 'real',
+                    name: 'd-real',
+                    component: () => import('@/views/detail/real.vue')
+                },
+                {
+                    path: 'history',
+                    name:'d-history',
+                    component: () => import('@/views/detail/history.vue')
+                }
+            ]
+        }
     ],
 });
 
