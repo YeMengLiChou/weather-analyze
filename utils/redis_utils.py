@@ -222,7 +222,7 @@ class RedisUtils(object):
         result = {}
         for city_id in cities_id:
             result[city_id] = province_id
-        self.sets_hash(constants.REDIS_CITY_INFO_RELATION, result)
+        self.__redis_conn.hset(constants.REDIS_CITY_INFO_RELATION, mapping=result)
 
     def set_city_relation_name(self, province_name: str, cities_name: list[str]):
         """s
@@ -234,7 +234,7 @@ class RedisUtils(object):
         result = {}
         for name in cities_name:
             result[name] = province_name
-        self.sets_hash(constants.REDIS_CITY_INFO_RELATION, result)
+        self.__redis_conn.hset(constants.REDIS_CITY_INFO_RELATION, mapping=result)
 
     def get_city_province(self, city_name: str) -> str | None:
         """
@@ -242,13 +242,11 @@ class RedisUtils(object):
         :param city_name:
         :return:
         """
-        value = self.get_hash(constants.REDIS_CITY_INFO_RELATION, city_name)
-        return value.decode()
+        return self.__redis_conn.hget(constants.REDIS_CITY_INFO_RELATION, city_name).decode()
 
     def get_all_cities_provinces(self):
         """
         获取城市所在省份,id和中文都可,id->id, name->name
-        :param cities:
         :return:
         """
         values = self.__redis_conn.hgetall(constants.REDIS_CITY_INFO_RELATION)
