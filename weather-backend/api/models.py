@@ -6,17 +6,17 @@ from django.db import models
 
 class RealData(models.Model):
     city_name = models.CharField(max_length=20, )
-    city_id = models.CharField(max_length=20)
+    city_id = models.CharField(max_length=20, primary_key=True)
     city_province = models.CharField(max_length=20)
-    temp = models.FloatField()
-    d_temp = models.FloatField()
-    n_temp = models.FloatField()
+    temp = models.DecimalField(decimal_places=1, max_digits=5)
+    d_temp = models.DecimalField(decimal_places=1, max_digits=5)
+    n_temp = models.DecimalField(decimal_places=1, max_digits=5)
     humidity = models.IntegerField()
     w_direction = models.CharField(max_length=10)
-    w_level = models.IntegerField(max_length=10)
+    w_level = models.IntegerField()
     w_speed = models.IntegerField()
-    rain = models.FloatField()
-    rain24h = models.FloatField()
+    rain = models.DecimalField(decimal_places=1, max_digits=5)
+    rain24h = models.DecimalField(decimal_places=1, max_digits=5)
     aqi = models.IntegerField()
     description = models.CharField(max_length=15)
     content = models.CharField(max_length=1500)
@@ -48,9 +48,9 @@ class HistoryData(models.Model):
     # 风等级 str
     w_level = models.CharField(max_length=10)
     # aqi int
-    aqi = models.IntegerField()
+    aqi = models.IntegerField(null=True)
     # aqi状态 str
-    aqi_status = models.CharField(max_length=10)
+    aqi_status = models.CharField(max_length=10, null=True)
 
     def __str__(self):
         return f"{self.city_name} {self.timestamp} {self.description}"

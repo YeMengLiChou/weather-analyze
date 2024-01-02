@@ -25,14 +25,14 @@ SECRET_KEY = 'django-insecure-j3@v-7bf75vfs_z0t6)&bh(hu#x=viobqu$=$fuafg^a@%x-mw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
-
+    'corsheaders', # 注册app corsheaders
     'django.contrib.admin',  # 管理员站点
     'django.contrib.auth',  # 认证授权系统
     'django.contrib.contenttypes',  # 内容类型框架
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # 加入中间键 位置必须在这里 不能在其他位置
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -80,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',  # 启用 mysql 数据库
         'NAME': 'weather',  # 数据库文件路径
         'USER': 'root',
-        'PASSWORD': 'suweikai',
+        'PASSWORD': 'anan',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -127,3 +128,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 在 setting.py 末尾添加以下设置
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = ('*')
