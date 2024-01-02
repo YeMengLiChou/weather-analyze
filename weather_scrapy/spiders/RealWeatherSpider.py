@@ -61,7 +61,6 @@ class RealWeatherSpider(WrappedRedisSpider):
                 },
                 dont_filter=True
             )
-            break
 
     def parse_page(self, response: Response) -> Any:
         """
@@ -178,8 +177,8 @@ class RealWeatherSpider(WrappedRedisSpider):
 
         meta['aqi'] = content['aqi']
 
-        meta['rain'] = int(content['rain'])
-        meta['rain24h'] = int(content['rain24h'])
+        meta['rain'] = float(content['rain'])
+        meta['rain24h'] = float(content['rain24h'])
 
         _time = content['time']
         meta['timestamp'] = int(datetime.datetime(

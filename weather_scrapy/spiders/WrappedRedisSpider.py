@@ -128,13 +128,19 @@ class WrappedRedisSpider(RedisSpider):
                 # 该省下面的城市
                 cities_id = []
                 cities_name = []
-                all_mapping.extend(result)
+                # TODO：已限制爬取省会信息
+                # all_mapping.extend(result)
                 for city_id, city_name in result:
                     cities_id.append(city_id)
                     cities_name.append(city_name)
+                    all_mapping.append((city_id, city_name))
+                    # TODO：已限制爬取省会信息
+                    self.logger.info(f'=======> {city_id} {city_name} {province_id} {provinces[province_id]}')
+                    break
                 # 设置该省市关系
                 self.redis.set_city_relation_id(province_id, cities_id)
                 self.redis.set_city_relation_name(provinces[province_id], cities_name)
+
         # 保存id
         self.redis.set_cities_sp_id(all_mapping)
 
@@ -177,4 +183,4 @@ class WrappedRedisSpider(RedisSpider):
         self.logger.info(f"======> 更新城市id数据完成: 共{int(len(mapping))}条数据")
         self.logger.info(f"======> 更新城市关系数据完成: 共{int(len(add))}条数据")
         self.scraping = False
-        self.callback()
+        yield from self.callback()

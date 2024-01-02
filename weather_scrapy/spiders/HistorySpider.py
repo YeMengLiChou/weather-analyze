@@ -74,6 +74,8 @@ class HistorySpider(WrappedRedisSpider):
         if ma:
             wind_direction = ma.group(1)
             wind_level = ma.group(2)
+            if wind_level == '微风':
+                wind_level = 0
             result = []
             for char in wind_direction:
                 if char in en_directions:

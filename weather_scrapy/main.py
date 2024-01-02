@@ -40,10 +40,10 @@ def run_history_spider():
 
 
 if __name__ == '__main__':
-    process_history()
     process_real()
+    process_history()
     schedule.every(1).days.do(process_history)
     schedule.every(1).hours.do(process_real)
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(60)

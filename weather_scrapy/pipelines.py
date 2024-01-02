@@ -48,7 +48,7 @@ class KafkaPipeline(object):
             self.logger.info(
                 f'======> {datetime.now()} send to kafka: {msg["data"]["city_name"]}-{msg["data"]["timestamp"]} '
             )
-        raise DropItem()
+        return item
 
     @staticmethod
     def process_history_item(item: HistoryWeatherItem, spider) -> dict | None:

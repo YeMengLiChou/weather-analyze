@@ -1,3 +1,4 @@
+import os.path
 from datetime import datetime
 
 from config import config
@@ -34,7 +35,6 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
 # Don't clean up redis queues, allows to pause/resume crawls. 允许暂停/恢复爬虫
 SCHEDULER_PERSIST = True
-
 
 # Schedule requests using a priority queue. (default)  使用优先级队列
 SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
@@ -100,7 +100,7 @@ CONCURRENT_REQUESTS = 5
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0
+DOWNLOAD_DELAY = 5
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -120,7 +120,7 @@ DOWNLOAD_DELAY = 0
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   # "weather_scrapy.middlewares.WeatherScrapySpiderMiddleware": 543,
+    # "weather_scrapy.middlewares.WeatherScrapySpiderMiddleware": 543,
 }
 
 # Enable or disable downloader middlewares
@@ -170,18 +170,15 @@ REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
-
 date = datetime.now().strftime('%Y%m%d-%H%M%S')
-LOG_ENABLED = True
-LOG_ENCODING = 'utf-8'
-LOG_FILE = f'/media/li/Li/Project/rate/logs/{date}.log'
-LOG_LEVEL = 'INFO'
-
-
+# LOG_ENABLED = True
+# LOG_ENCODING = 'utf-8'
+# path = os.path.abspath(__file__).rsplit(os.sep, 2)[0]
+# LOG_FILE = f'{path}/logs/{date}.log'
+# LOG_LEVEL = 'INFO'
 
 RETRY_ENABLED = True  # 打开重试开关
 RETRY_TIMES = 3  # 重试次数
 
 REDIS_CONFIG = config.REDIS_CONFIG
 KAFKA_CONFIG = config.KAFKA_CONFIG
-
