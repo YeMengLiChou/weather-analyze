@@ -243,7 +243,20 @@ class RedisUtils(object):
         :return:
         """
         value = self.get_hash(constants.REDIS_CITY_INFO_RELATION, city_name)
-        return value
+        return value.decode()
+
+    def get_all_cities_provinces(self):
+        """
+        获取城市所在省份,id和中文都可,id->id, name->name
+        :param cities:
+        :return:
+        """
+        values = self.__redis_conn.hgetall(constants.REDIS_CITY_INFO_RELATION)
+        result = {}
+        for key, value in values.items():
+            result[key.decode()] = value.decode()
+        return result
+
 
     def set_cities_id(self, mapping: list[tuple[str, str]]):
         """
@@ -273,13 +286,11 @@ class RedisUtils(object):
         """
         keys = [constants.get_city_info_id_key(city) for city in cities]
         values = self.gets(keys)
-        if values:
-            return [value.decode('utf-8')[1:-1] for value in values]
-        return values
+        return [value.decode('utf-8')[1:-1] for value in values]
 
     def add_all_cities(self, cities: list[str]):
         """
-        添加城市id到所有城市中
+        添加城市名称到所有城市中
         :param cities:
         :return:
         """
@@ -287,19 +298,10 @@ class RedisUtils(object):
 
     def get_all_cities(self) -> list[str]:
         """
-        获取所有城市的id
+        获取所有城市名称
         :return:
         """
         return list(map(lambda x: x.decode('utf-8'), self.__redis_conn.smembers(constants.REDIS_CITY_ALL_KEY)))
-
-    def get_all_cities_name(self) -> list[str]:
-        """
-        获取所有城市的中文名称
-        :return:
-        """
-        ids = self.get_all_cities()
-        values = self.__redis_conn.mget([constants.get_city_info_spid_key(_id) for _id in ids])
-        return [value.decode() for value in values]
 
     def remove_cities(self, cities_id: list[str]):
         """
