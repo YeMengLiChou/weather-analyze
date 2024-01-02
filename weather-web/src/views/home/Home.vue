@@ -1,18 +1,24 @@
 <template>
-    <el-header>
-        
-    </el-header>
-    <el-main>
-
-    </el-main>
-
+    <el-container>
+        <RouterView ></RouterView>
+    </el-container>
 </template>
 
 <script setup>
+import {ref, onMounted} from 'vue';
+
+onMounted(() => {
+    console.log('Home.vue onMounted');
+});
 
 </script>
 
 
 <style scoped>
+el-container {
+    background-color: white;
+}
 
-</style>
+el-row {
+    height: 100%;
+}</style>

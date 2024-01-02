@@ -1,9 +1,39 @@
+import axios from "axios";
+import msg from "@/utils/message";
+
+
 // 单例 axios 实例
 const service = axios.create({
     baseURL: constants.baseUrl,
     timeout: 5000,
 });
 
+
+// 响应拦截器
+service.interceptors.response.use(
+    (response) => {
+        // 文件下载
+        if (response.config.responseType === "blob") {
+            return response;
+        }
+    
+        const res = response.data;
+        // debug
+        console.log(response.config.url, response.statusCode, response.data);
+
+        // 响应码不是 200
+        if (res.code !== 200) {
+            msg.error(res.msg, 2500)
+        } else {
+            return res.data;
+        }
+    },
+    (error) => {
+        console.log("err" + error); // for debug
+        msg.error(error.message, 5000);
+        return Promise.reject(error);
+    }
+);
 
 /**
  * get方法请求
