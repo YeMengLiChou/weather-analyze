@@ -310,3 +310,35 @@ class RedisUtils(object):
         :return:
         """
         self.__redis_conn.srem(constants.REDIS_CITY_ALL_KEY, *cities_id)
+
+
+    def add_history_date(self, city_name, *date: str):
+        """
+        设置历史天气日期
+        :param date:
+        :return:
+        """
+        self.__redis_conn.sadd(constants.get_history_time_key(city_name), *date)
+
+    def is_exist_history_date(self, city_name, date: str) -> bool:
+        """
+        判断某个日期是否存在
+        :param city_name:
+        :param date:
+        :return:
+        """
+        return self.__redis_conn.sismember(constants.get_history_time_key(city_name), date) == -1
+
+    def is_exist_history_dates(self, city_name, date: list[str]) -> list[str]:
+        """
+        判断某个日期是否存在
+        :param city_name:
+        :param date:
+        :return:
+        """
+        not_exist = []
+        for d in date:
+            if not self.is_exist_history_date(city_name, d):
+                not_exist.append(d)
+        return not_exist
+

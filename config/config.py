@@ -8,6 +8,7 @@ KAFKA_CONFIG = {
     'bootstrap_servers': '127.0.0.1:9092',
     'topics': {
         'scrapy': 'weather_scrapy_topic'
-    }
+    },
+'num_partitions': 1
 
 }

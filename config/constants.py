@@ -36,6 +36,12 @@ REDIS_CITY_ALL_KEY = 'city:info:all'
 保存需要爬取的城市id信息
 """
 
+REDIS_HISTORY_TIME_KEY = 'history:time:'
+"""
+历史数据的最新日期
+"""
+
+
 DATA_TYPE_REAL = 1
 """
 实时数据
@@ -70,3 +76,14 @@ def get_city_info_id_key(city_id: str) -> str:
     :return: 城市id数据key
     """
     return REDIS_CITY_INFO_ID_PREFIX + city_id
+
+
+def get_history_time_key(city_name) -> str:
+    """
+    获取历史数据最新日期的key
+
+    :param city_name
+    :param date
+    :return: 历史数据最新日期的key
+    """
+    return f'{REDIS_HISTORY_TIME_KEY}{city_name}'
