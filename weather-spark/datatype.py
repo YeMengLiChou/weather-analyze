@@ -35,7 +35,6 @@ real_data_schema = StructType([
     StructField("timestamp", LongType()),
     StructField("sunrise", LongType()),
     StructField("sunset", LongType()),
-
 ])
 
 
@@ -44,9 +43,9 @@ json_schema = StructType([
     StructField("type", IntegerType()),
     StructField("data", StringType())
 ])
-
-# 数据分析的结构
-analyze_schema = StructType([
-    # StructField('')
-])
+#
+# # 数据分析的结构
+# analyze_schema = StructType([
+#     # StructField('')
+# ])
 
