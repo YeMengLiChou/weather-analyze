@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import *
 from pyspark.sql.streaming import StreamingQuery
 
-from ..settings import KAFKA_CONFIG
+from config.config import KAFKA_CONFIG
 
 
 class SparkUtils:

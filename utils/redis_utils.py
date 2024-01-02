@@ -242,7 +242,12 @@ class RedisUtils(object):
         :param city_name:
         :return:
         """
-        return self.__redis_conn.hget(constants.REDIS_CITY_INFO_RELATION, city_name).decode()
+
+        value = self.__redis_conn.hget(constants.REDIS_CITY_INFO_RELATION, city_name)
+        if value:
+            return value.decode()
+        else:
+            return None
 
     def get_all_cities_provinces(self):
         """
@@ -325,7 +330,7 @@ class RedisUtils(object):
         :param date:
         :return:
         """
-        return self.__redis_conn.sismember(constants.get_history_time_key(city_name), date) == -1
+        return self.__redis_conn.sismember(constants.get_history_time_key(city_name), date) == 1
 
     def is_exist_history_dates(self, city_name, date: list[str]) -> list[str]:
         """

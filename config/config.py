@@ -11,3 +11,12 @@ KAFKA_CONFIG = {
     },
     'num_partitions': 1
 }
+
+
+MYSQL_CONFIG = {
+    'host': '127.0.0.1',
+    'port': 3306,
+    'user': 'root',
+    'password': 'anan',
+    'db': 'weather',
+}
