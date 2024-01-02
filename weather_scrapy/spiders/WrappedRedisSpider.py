@@ -116,11 +116,16 @@ class WrappedRedisSpider(RedisSpider):
 
         meta = response.meta
         provinces = meta['provinces']
-        lines = response.text.splitlines()[1:35]
+
+        content: list = response.text.splitlines()
+        lines = content[8:35]
+        lines.extend(content[37:])
         # 所有id到name的映射
         all_mapping = []
         for line in lines:
             res = re.match(r"prov\[(\d+)]\s?=\s?'(.+)'", line)
+            if not res:
+                res = re.match(r"provqx\[(\d+)]\s?=\s?\['(.+)']", line)
             if res:
                 province_id = res.group(1)
                 cities_info = res.group(2)
@@ -143,7 +148,6 @@ class WrappedRedisSpider(RedisSpider):
 
         # 保存id
         self.redis.set_cities_sp_id(all_mapping)
-
         # 信息已经更新完毕，设置状态为已有
         self.logger.info(f"======> 更新城市所需id完成: 共{len(all_mapping)}条数据")
         yield scrapy.Request(

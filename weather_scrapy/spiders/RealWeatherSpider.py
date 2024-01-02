@@ -190,22 +190,23 @@ class RealWeatherSpider(WrappedRedisSpider):
         ).timestamp() * 1000)
 
         item = RealWeatherItem()
+
         item['city_id'] = meta['city_id']
         item['city_name'] = meta['city_name']
-        item['city_province'] = self.redis.get_city_id(
+        item['city_province'] = self.redis.get_city_province(
             self.redis.get_city_province(meta['city_name'])
         )
-        item['temp'] = meta['temp']
-        item['d_temp'] = meta['d_temp']
-        item['n_temp'] = meta['n_temp']
-        item['w_level'] = meta['w_level']
+        item['temp'] = float(meta['temp'])
+        item['d_temp'] = int(meta['d_temp'])
+        item['n_temp'] = int(meta['n_temp'])
+        item['w_level'] = int(meta['w_level'])
         item['w_speed'] = meta['w_speed']
         item['w_direction'] = meta['w_direction']
         item['humidity'] = meta['humidity']
         item['description'] = meta['description']
         item['content'] = meta['content']
         item['timestamp'] = meta['timestamp']
-        item['aqi'] = meta['aqi']
+        item['aqi'] = int(meta['aqi'])
         item['rain'] = meta['rain']
         item['rain24h'] = meta['rain24h']
         item['sunrise'] = meta['sunrise']

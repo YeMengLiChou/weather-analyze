@@ -66,3 +66,5 @@ class HistoryWeatherItem(scrapy.Item):
     aqi = scrapy.Field()
     # aqi状态 str
     aqi_status = scrapy.Field()
+
+

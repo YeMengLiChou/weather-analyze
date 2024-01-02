@@ -28,16 +28,14 @@ class HistorySpider(WrappedRedisSpider):
         dates = [(year, month) for year in range(now.year - 5, now.year) for month in range(1, 13)]
         for month in range(1, now.month):
             dates.append((now.year, month))
-
         need_dates = []
         for year, month in dates:
             if not self.redis.is_exist_history_date(city_name, f'{year}{month}'):
                 need_dates.append((year, month))
-
         for year, month in need_dates:
-                area_info_part = f"areaInfo%5BareaId%5D={city_name}&areaInfo%5BareaType%5D=2"
-                date_part = f"date%5Byear%5D={now.year - year}&date%5Bmonth%5D={month}"
-                urls.append((f'{url_prefix}?{area_info_part}&{date_part}', year, month))
+            area_info_part = f"areaInfo%5BareaId%5D={city_name}&areaInfo%5BareaType%5D=2"
+            date_part = f"date%5Byear%5D={year}&date%5Bmonth%5D={month}"
+            urls.append((f'{url_prefix}?{area_info_part}&{date_part}', year, month))
         return urls
 
     @staticmethod
@@ -76,6 +74,8 @@ class HistorySpider(WrappedRedisSpider):
             wind_level = ma.group(2)
             if wind_level == '微风':
                 wind_level = 0
+            else:
+                wind_level = int(wind_level)
             result = []
             for char in wind_direction:
                 if char in en_directions:
@@ -116,43 +116,56 @@ class HistorySpider(WrappedRedisSpider):
                 yield scrapy.Request(
                     url=url,
                     callback=self.parse,
-                    meta={'city_id': city_id, 'year': year,'month': month},
+                    meta={'city_id': city_id, 'year': year, 'month': month},
                     dont_filter=True
                 )
-                break
-            break
+            #     break
+            # break
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
+        """
+        解析历史数据页面
+        :param response:
+        :param kwargs:
+        :return:
+        """
         text = response.text
         content = json.loads(text)
         data = content['data']
         resolved = html.fromstring(data)
-
+        meta = response.meta
+        self.logger.info(f'======> history: {meta["city_id"]} {meta["year"]}-{meta["month"]}')
         items = []
-        rows = resolved.xpath('//table/tr')[1:]
+        rows = resolved.xpath('//table//tr')[1:]
         for row in rows:
             tds = row.xpath('./td')
-            texts = SelectorList(tds[:-1]).xpath('./text()')
+            pos = len(tds)
+            if pos == 6:
+                texts = SelectorList(tds[:-1]).xpath('./text()')
+            else:
+                texts = SelectorList(tds).xpath('./text()')
 
             timestamp = self.__get_timestamp_from_time_str(texts[0])
-            high_temp = texts[1][:-1]
-            low_temp = texts[2][:-1]
+            high_temp = int(texts[1][:-1])
+            low_temp = int(texts[2][:-1])
             description = texts[3]
             w_direction, w_level = self.__parse_wind_info(texts[4])
-
-            aqi_text = tds[-1].xpath('./span/text()')[0]
-            if aqi_text == '-':
+            if pos == 6:
+                aqi_text = tds[-1].xpath('./span/text()')[0]
+                if aqi_text == '-':
+                    aqi = None
+                    aqi_status = None
+                else:
+                    aqi, aqi_status = aqi_text.split()
+                    aqi = int(aqi)
+            else:
                 aqi = None
                 aqi_status = None
-            else:
-                aqi, aqi_status = aqi_text.split()
-                aqi = int(aqi)
-
             item = HistoryWeatherItem()
-            city_id = response.meta['city_id']
+            city_id = meta['city_id']
             city_name = self.redis.get_city_name_by_spid(city_id)
             item['city_name'] = city_name
-            item['city_id'] = city_id
+            item['city_id'] = self.redis.get_city_id(city_name)
             item['city_province'] = self.redis.get_city_province(city_name)
             item['timestamp'] = timestamp
             item['description'] = description

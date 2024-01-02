@@ -22,7 +22,9 @@ def process_history():
 
 
 def run_real_spider():
-    """运行指定爬虫"""
+    """
+    运行指定爬虫
+    """
     date = datetime.now().strftime("%Y%m%d-%H:%M")
     logger.info(f"{date}=======> start spider-real")
     crawler = CrawlerProcess(get_project_settings())
@@ -31,7 +33,9 @@ def run_real_spider():
 
 
 def run_history_spider():
-    """运行指定爬虫"""
+    """
+    运行指定爬虫
+    """
     date = datetime.now().strftime("%Y%m%d-%H:%M")
     logger.info(f"{date}=======> start spider-history")
     crawler = CrawlerProcess(get_project_settings())
@@ -43,7 +47,7 @@ if __name__ == '__main__':
     process_real()
     process_history()
     schedule.every(1).days.do(process_history)
-    schedule.every(1).hours.do(process_real)
+    schedule.every(10).minutes.do(process_real)
     while True:
         schedule.run_pending()
         time.sleep(60)
