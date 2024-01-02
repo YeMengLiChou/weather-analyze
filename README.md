@@ -375,3 +375,18 @@ views.py 为视图，类似Springboot中的Service，可以返回各种信息
 ## 前端
 
 采用vue3+echarts+elementui编写前端页面，分别展示各种信息
+
+
+
+
+
+## 数据分析
+
+使用 Spark Structucted Streaming 进行数据流处理
+
+先读取Kafka主题中的数据，根据数据中的type进行分类：实时和历史
+
+- 实时直接保存
+- 历史先保存，然后进行分析，最后保存分析数据
+
+直接将数据保存到mysql中

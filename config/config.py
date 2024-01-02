@@ -9,6 +9,6 @@ KAFKA_CONFIG = {
     'topics': {
         'scrapy': 'weather_scrapy_topic'
     },
-'num_partitions': 1
+    'num_partitions': 1
 
 }
