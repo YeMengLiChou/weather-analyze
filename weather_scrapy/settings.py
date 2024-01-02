@@ -1,3 +1,4 @@
+from datetime import datetime
 
 from config import config
 
@@ -168,6 +169,15 @@ DOWNLOADER_MIDDLEWARES = {
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+
+date = datetime.now().strftime('%Y%m%d-%H%M%S')
+LOG_ENABLED = True
+LOG_ENCODING = 'utf-8'
+LOG_FILE = f'/media/li/Li/Project/rate/logs/{date}.log'
+LOG_LEVEL = 'INFO'
+
+
 
 RETRY_ENABLED = True  # 打开重试开关
 RETRY_TIMES = 3  # 重试次数

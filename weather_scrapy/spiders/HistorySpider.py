@@ -3,8 +3,8 @@ import json
 import re
 from typing import Any
 
-from lxml import etree, html
 import scrapy
+from lxml import html
 from scrapy.http import Response
 from scrapy.selector import SelectorList
 
@@ -15,8 +15,7 @@ from weather_scrapy.spiders.WrappedRedisSpider import WrappedRedisSpider
 class HistorySpider(WrappedRedisSpider):
     name = 'history'
 
-    @staticmethod
-    def __get_scrape_urls(city_name: str) -> list[str]:
+    def __get_scrape_urls(self, city_name: str) -> list:
         """
         获取历史天气的url
         :param city_name:
@@ -25,15 +24,20 @@ class HistorySpider(WrappedRedisSpider):
         url_prefix = f"https://tianqi.2345.com/Pc/GetHistory"
         now = datetime.datetime.now()
         urls = []
-        for year in range(1, 6):
-            for month in range(1, 12):
-                area_info_part = f"areaInfo%5BareaId%5D={54511}&areaInfo%5BareaType%5D={2}"
-                date_part = f"date%5Byear%5D={now.year - year}&date%5Bmonth%5D={month}"
-                urls.append(f'{url_prefix}?{area_info_part}&{date_part}')
+
+        dates = [(year, month) for year in range(now.year - 5, now.year) for month in range(1, 13)]
         for month in range(1, now.month):
-            area_info_part = f"areaInfo%5BareaId%5D={54511}&areaInfo%5BareaType%5D={2}"
-            date_part = f"date%5Byear%5D={now.year}&date%5Bmonth%5D={month}"
-            urls.append(f'{url_prefix}?{area_info_part}&{date_part}')
+            dates.append((now.year, month))
+
+        need_dates = []
+        for year, month in dates:
+            if not self.redis.is_exist_history_date(city_name, f'{year}{month}'):
+                need_dates.append((year, month))
+
+        for year, month in need_dates:
+                area_info_part = f"areaInfo%5BareaId%5D={city_name}&areaInfo%5BareaType%5D=2"
+                date_part = f"date%5Byear%5D={now.year - year}&date%5Bmonth%5D={month}"
+                urls.append((f'{url_prefix}?{area_info_part}&{date_part}', year, month))
         return urls
 
     @staticmethod
@@ -106,11 +110,11 @@ class HistorySpider(WrappedRedisSpider):
         all_cities: list[str] = self.redis.get_all_cities()
         all_cities_sp_id: list[str] = self.redis.get_cities_spid_by_name(all_cities)
         for city_id in all_cities_sp_id:
-            for url in self.__get_scrape_urls(city_id):
+            for url, year, month in self.__get_scrape_urls(city_id):
                 yield scrapy.Request(
                     url=url,
                     callback=self.parse,
-                    meta={'city_id': city_id},
+                    meta={'city_id': city_id, 'year': year,'month': month},
                     dont_filter=True
                 )
                 break
@@ -158,3 +162,4 @@ class HistorySpider(WrappedRedisSpider):
             item['aqi_status'] = aqi_status
             items.append(item)
         yield from items
+        self.redis.add_history_date(response.meta['city_id'], f'{response.meta["year"]}{response.meta["month"]}')
