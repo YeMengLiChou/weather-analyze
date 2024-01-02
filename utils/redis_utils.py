@@ -168,78 +168,95 @@ class RedisUtils(object):
     def set_kafka_offset(self, topic: str, partition: int, groupId: str = None, offset: int = 0):
         self.set(f'kafka-{topic}{partition}-{groupId if groupId else ""}', offset)
 
-    def set_city_pinyin(self, chinese: str, pinyin: str):
+    def set_cities_sp_id(self, items: list[tuple[str, str]] | dict[str, str]):
         """
-        设置城市中文和拼音的对应关系
-        :param chinese:
-        :param pinyin:
+        设置城市特殊的id（2345天气网特有的）
+        :param items: id->城市
         :return:
         """
-        self.sets([
-            (constants.get_city_info_name_key(chinese), pinyin),
-            (constants.get_city_info_name_key(pinyin), chinese)
-        ])
+        if isinstance(items, dict):
+            items = items.items()
+        mapping = {}
+        for item in items:
+            mapping[constants.get_city_info_spid_key(item[0])] = item[1]
+            mapping[constants.get_city_info_spid_key(item[1])] = item[0]
+        self.__redis_conn.mset(mapping)
 
-    def get_city_pinyin(self, chinese: str) -> str | None:
+    def get_city_spid_by_name(self, city_name: str) -> str | None:
         """
-        获取城市中文和拼音的对应关系
-        :param chinese:
-        :return: pinyin
+        获取城市的特殊id
+        :param city_name:
+        :return:
         """
-        value = self.get(constants.get_city_info_name_key(chinese))
-        if value:
-            return value
-        else:
-            return None
+        value = self.__redis_conn.get(constants.get_city_info_spid_key(city_name))
+        return value.decode()
 
-    def get_city_chinese(self, pinyin: str) -> str | None:
+    def get_cities_spid_by_name(self, cities_name: list[str]) -> list[str] | None:
         """
-        根据 pinyin 获取对应城市的中文名称
-        :param pinyin:
-        :return: chinese
+        获取城市的特殊id
+        :param cities_name:
+        :return:
         """
-        value = self.get(constants.get_city_info_name_key(pinyin))
-        if value:
-            return value
-        else:
-            return None
+        keys = [constants.get_city_info_spid_key(city_name) for city_name in cities_name]
+        values = [value.decode('utf-8') for value in self.__redis_conn.mget(keys)]
+        if len(values) > 0:
+            return values
+        return None
 
-    def get_cities_chinese(self, pinyins: list[str]) -> list[str]:
+    def get_city_name_by_spid(self, city_id: str) -> str | None:
         """
-        根据 pinyins 获取对应城市的中文名称
-        :param pinyins:
-        :return: chinese
+        获取城市的名字
+        :param city_id:
+        :return:
         """
-        keys = [constants.get_city_info_name_key(pinyin) for pinyin in pinyins]
-        return self.gets(keys)
+        value = self.__redis_conn.get(constants.get_city_info_spid_key(city_id))
+        return value.decode()
 
-    def set_city_relation(self, province_name: str, cities_name: list[str]):
+    def set_city_relation_id(self, province_id: str, cities_id: list[str]):
         """s
-        设置城市关系，市级城市->省级城市（拼音）
+        设置城市关系，市级城市->省级城市 (id -> id)
+        :param province_id:
+        :param cities_id: 所属市级城市列表
+        :return:
+        """
+        result = {}
+        for city_id in cities_id:
+            result[city_id] = province_id
+        self.sets_hash(constants.REDIS_CITY_INFO_RELATION, result)
+
+    def set_city_relation_name(self, province_name: str, cities_name: list[str]):
+        """s
+        设置城市关系，市级城市->省级城市 (name -> name)
         :param province_name:
         :param cities_name: 所属市级城市列表
         :return:
         """
         result = {}
-        for city_name in cities_name:
-            result[city_name] = province_name
+        for name in cities_name:
+            result[name] = province_name
         self.sets_hash(constants.REDIS_CITY_INFO_RELATION, result)
 
-    def get_city_province(self, city_name: str, is_pinyin: bool = True) -> str | None:
+    def get_city_province(self, city_name: str) -> str | None:
         """
-        获取城市所在省份
+        获取城市所在省份,id和中文都可,id->id, name->name
         :param city_name:
-        :param is_pinyin: 是否为拼音
         :return:
         """
-        # 获取对应的拼音
-        if not is_pinyin:
-            city_name = self.get_city_pinyin(city_name)
-        if not city_name:
-            return None
-
         value = self.get_hash(constants.REDIS_CITY_INFO_RELATION, city_name)
-        return value
+        return value.decode()
+
+    def get_all_cities_provinces(self):
+        """
+        获取城市所在省份,id和中文都可,id->id, name->name
+        :param cities:
+        :return:
+        """
+        values = self.__redis_conn.hgetall(constants.REDIS_CITY_INFO_RELATION)
+        result = {}
+        for key, value in values.items():
+            result[key.decode()] = value.decode()
+        return result
+
 
     def set_cities_id(self, mapping: list[tuple[str, str]]):
         """
@@ -250,11 +267,12 @@ class RedisUtils(object):
         result = []
         for item in mapping:
             result.append((constants.get_city_info_id_key(item[0]), item[1]))
+            result.append((constants.get_city_info_id_key(item[1]), item[0]))
         self.sets(result)
 
     def get_city_id(self, city_name: str) -> str | None:
         """
-        根据拼音或者中文获取城市id，根据城市id获取拼音
+        根据中文获取城市id，或根据城市id获取中文名字
         :param city_name:
         :return:
         """
@@ -262,32 +280,33 @@ class RedisUtils(object):
 
     def get_cities_id(self, cities: list[str]) -> list[str] | None:
         """
-        根据拼音或者中文获取城市id，根据城市id获取拼音
-        :param cities: 中文pinyin都可以
+        根据中文获取城市id，根据城市id获取拼音
+        :param cities:
         :return:
         """
         keys = [constants.get_city_info_id_key(city) for city in cities]
-        return self.gets(keys)
+        values = self.gets(keys)
+        return [value.decode('utf-8')[1:-1] for value in values]
 
     def add_all_cities(self, cities: list[str]):
         """
-        添加城市信息到所有城市中
+        添加城市名称到所有城市中
         :param cities:
         :return:
         """
-        self.add_set(constants.REDIS_CITY_ALL_KEY, cities)
+        self.__redis_conn.sadd(constants.REDIS_CITY_ALL_KEY, *cities)
 
     def get_all_cities(self) -> list[str]:
         """
-        获取所有城市的拼音
+        获取所有城市名称
         :return:
         """
-        return self.get_set(constants.REDIS_CITY_ALL_KEY)
+        return list(map(lambda x: x.decode('utf-8'), self.__redis_conn.smembers(constants.REDIS_CITY_ALL_KEY)))
 
-    def remove_cities(self, cities: list[str]):
+    def remove_cities(self, cities_id: list[str]):
         """
-        删除指定的 cities
-        :param cities:
+        删除指定的 cities 的 id
+        :param cities_id:
         :return:
         """
-        self.remove_set(constants.REDIS_CITY_ALL_KEY, cities)
+        self.__redis_conn.srem(constants.REDIS_CITY_ALL_KEY, *cities_id)

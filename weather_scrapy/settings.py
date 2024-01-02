@@ -50,7 +50,7 @@ SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
 
 # Store scraped item in redis for post-processing.
 ITEM_PIPELINES = {
-    # 'scrapy_redis.pipelines.RedisPipeline': 300
+    'weather_scrapy.pipelines.KafkaPipeline': 100,
 }
 
 # The item pipeline serializes and stores the items in this redis key.
@@ -99,7 +99,7 @@ CONCURRENT_REQUESTS = 5
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 20
+DOWNLOAD_DELAY = 0
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -174,3 +174,4 @@ RETRY_TIMES = 3  # 重试次数
 
 REDIS_CONFIG = config.REDIS_CONFIG
 KAFKA_CONFIG = config.KAFKA_CONFIG
+
